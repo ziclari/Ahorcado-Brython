@@ -1,3 +1,3 @@
-#Ahorcado en python
+# Ahorcado en python
 
 Hecho con brython y microstudio
