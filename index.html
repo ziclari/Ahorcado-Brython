@@ -1,0 +1,253 @@
+<!DOCTYPE html><html><head><title>ahorcado</title><meta http-equiv="content-type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui=1"><meta charset="UTF-8"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="description" content=""><link rel="manifest" href="manifest.json"><link rel="icon" type="image/png" href="icon64.png"><link rel="apple-touch-icon" sizes="180x180" href="icon180.png"><link rel="icon" type="image/png" sizes="32x32" href="icon32.png"><link rel="icon" type="image/png" sizes="16x16" href="icon16.png"><style>html,body {
+  margin: 0;
+  padding: 0;
+  background-color: #000;
+  overflow:hidden;
+  font-family: Verdana;
+}
+.noselect {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+#canvaswrapper {
+  text-align: center ;
+}
+</style><style>@font-face { font-family: "BitCell" ; src: url("fonts/BitCell.ttf") format("truetype"); }</style><script>window.fonts = ["BitCell"]</script></head><body class="noselect custom-cursor" oncontextmenu="return false;"><div id="canvaswrapper"></div><script type="text/javascript">var resources = {"images":[{"file":"a0.png","version":12,"size":131,"properties":{"frames":1,"fps":5}},{"file":"a1.png","version":9,"size":147,"properties":{"frames":1,"fps":5}},{"file":"a2.png","version":9,"size":158,"properties":{"frames":1,"fps":5}},{"file":"a3.png","version":8,"size":177,"properties":{"frames":1,"fps":5}},{"file":"a4.png","version":7,"size":197,"properties":{"frames":1,"fps":5}},{"file":"a5.png","version":7,"size":221,"properties":{"frames":1,"fps":5}},{"file":"a6.png","version":6,"size":225,"properties":{"frames":1,"fps":5}},{"file":"icon.png","version":9,"size":231,"properties":{"frames":1,"fps":5}},{"file":"regresar.png","version":4,"size":170,"properties":{"frames":1,"fps":5}},{"file":"reintentar.png","version":26,"size":184,"properties":{"frames":1,"fps":5}}],"assets":[],"maps":{},"sounds":[],"music":[]};
+var graphics = "M1";
+
+</script><script type="text/javascript">var orientation = 'any' ;
+var aspect = 'free' ;
+var ms_libs = [] ;
+window.skip_service_worker = true;
+window.exported_project = true;
+window.ms_use_server = false ;
+</script><script src="runner.js"></script><script src="brython.js"></script><script src="brython_stdlib.js"></script><script src="microengine.js"></script></body><script type="text/python">from browser import window
+import traceback
+import sys
+
+def execute(str,filename):
+  try:
+    code = compile(str,filename,"exec")
+    return exec(code,globals())
+  except BaseException as err:
+    exp = traceback.format_exception(err)
+    sys.stderr.write(exp)
+  except Error as err:
+    exp = traceback.format_exception(err)
+    sys.stderr.write(exp)
+
+window.python = execute
+window.glob = globals()
+window.pythonLoaded()
+</script><script>window.pythonLoaded = function() {
+  window.player = new Player() ;
+  document.body.focus() ;
+}
+window.addEventListener("load",function() {
+  brython() ;
+}) ;
+
+</script><script id="code" type="text/x-microscript">
+
+def captura():
+  for letra in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+    if checkInput(keyboard.press,letra):
+      return letra.lower()
+  return ""
+
+def checkInput(obj,val):
+  if hasattr(obj,val):
+    return obj[val] != 0
+  return 0
+def mouseEncima(x,y,tamano):
+  return abs(mouse.x - x) <= tamano/2 and abs(mouse.y - y) <= tamano/2
+
+def huboClick(x,y,tamano):
+  if mouseEncima(x,y,tamano):
+    if mouse.press:
+      return True
+  return False
+
+import random
+
+categorias_disponibles = {
+      "animales": ["perro","gato","pez","rinoceronte","pajaro","jirafa"],
+      "frutas"  : ["mango","pera","manzana","platano","fresa","uva","granada"],
+      "colores" : ["rojo","azul","verde","amarillo","morado","marron","cafe"],
+      "profesiones": ["ingeniero","maestro","arquitecto","medico","enfermero","doctor"],
+      "deportes": ["futbol","tenis","baloncesto","natacion"],
+      "transporte": ["coche","avion","bicicleta","tren","metro","metrobus"],
+      "emociones": ["enojo","felicidad","sorpresa","tristeza","pereza"]
+  }
+  
+opcion_categoria = 0
+palabra_elegida = ""
+
+
+
+
+def pantalla_inicio(index_elegido):
+  screen.drawText("¡Bienvenido  al juego del ahorcado!",0,75,20, "#FFF")
+  screen.drawText("Tenemos las siguientes categorias:",0,60,15, "#FFF")
+  global diccionario
+  global palabra_elegida
+  
+  x = 38
+  y = 0
+  tam = 15
+  color = "#FF0"
+  colorElegido = "#F0F"
+      
+  
+  for index, categoria in enumerate(categorias_disponibles):
+    if index_elegido == index :
+      screen.drawText(categoria.capitalize(), y, x, tam, colorElegido)
+      if  checkInput(keyboard.press, "ENTER") :
+        palabra_elegida = random.choice(categorias_disponibles[categoria])
+        return "juego", palabra_elegida
+    else:
+      screen.drawText(categoria.capitalize(), y, x, tam, color)
+    x -= 15
+
+  
+  return "inicio",""
+  
+  
+def eligeCategoria():
+  global opcion_categoria
+  if checkInput(keyboard.press,"DOWN"):
+    opcion_categoria+=1
+    if opcion_categoria>len(categorias_disponibles):
+      opcion_categoria = 0
+        
+  if checkInput(keyboard.press,"UP"):
+    opcion_categoria-=1
+    if opcion_categoria<0:
+      opcion_categoria=len(categorias_disponibles)-1
+
+
+palabra_oculta = ["_"]*len(palabra_elegida)
+dibujo = ["a0","a1","a2","a3","a4","a5","a6"]
+oportunidades = len(dibujo)-1
+letrasErradas = []
+causaFin = ""
+
+def dibujaTablero():
+  #Muestra el tablero
+    screen.clear()
+    global letrasErradas,palabra_oculta
+    screen.drawSprite(dibujo[len(letrasErradas)],0,45,100)
+    screen.drawText(' '.join(palabra_oculta),0,-30,20, "#FFF")
+    screen.drawText(', '.join(letrasErradas),0,-65,20, "#FFF")
+
+def verificarLetra(adivinar):
+  global palabra_oculta, palabra_elegida, oportunidades
+  
+  if adivinar in palabra_elegida:
+    for i, val in enumerate(palabra_oculta):
+        if adivinar == palabra_elegida[i]:
+          palabra_oculta[i]=adivinar
+  else:
+    letrasErradas.append(adivinar)
+    oportunidades-=1
+
+def finDeJuego():
+  global oportunidades,palabra_oculta, palabra_elegida,letras_erradas, dibujo
+  if oportunidades==0:
+      oportunidades = len(dibujo)-1
+      letrasErradas.clear()
+      return "Perdio"
+  if "".join(palabra_oculta) == palabra_elegida:
+      screen.clear()
+      oportunidades = len(dibujo)-1
+      letrasErradas.clear()
+      return "Gano"
+  else:
+     return ""
+
+def dibujaFin(causa):
+  global palabra_oculta, letras_erradas, dibujo
+  if causa=="Perdio":
+      screen.drawSprite(dibujo[len(letrasErradas)-1],0,45,100)
+      screen.drawText("Perdiste el juego :(",0,-30,20, "#FFF")
+      screen.drawSprite("regresar",0,-65,50)
+
+  if causa == "Gano":
+      screen.drawText(' '.join(palabra_oculta),0,35,20, "#FFF")
+      screen.drawText("Ganaste :D",0,0,20, "#FFF")
+      screen.drawSprite("regresar",0,-50,50)
+
+def manejarFin():
+  x = 0
+  y = -50
+  # Tamaño del cuadrado
+  tamano = 50
+  
+  # Comprobar si el clic del ratón está dentro del cuadrado
+  if huboClick(x,y,tamano):
+    return "inicio"
+  
+  return "fin"
+  
+
+
+estado = "inicio"
+
+def init():
+  global estado
+  estado = "inicio"
+  
+
+def update():
+  global estado
+  
+  if estado == "inicio":
+    eligeCategoria()
+  if estado == "juego":
+    #Solicita la letra
+    adivinar =  captura()
+    if adivinar!="":
+      verificarLetra(adivinar)
+    
+    global causaFin
+    causaFin = finDeJuego()
+    if  causaFin != "":
+      estado = "fin"
+      
+  if estado=="fin":
+    estado=manejarFin()
+    #  estado = "inicio"
+
+
+
+def draw():
+  screen.clear()
+  #dibuja el inicio del juego
+  global estado
+  global palabra_elegida,palabra_oculta
+  
+  if estado == "inicio":
+    global opcion_categoria
+    estado,palabra_elegida = pantalla_inicio(opcion_categoria)
+    if palabra_elegida != "":
+      palabra_oculta = ["_"]*len(palabra_elegida)
+      
+  if estado == "juego":
+    dibujaTablero()
+  
+  if estado == "fin":
+    global causaFin
+    dibujaFin(causaFin)
+    
+    
+    
+  #leeletra()
+  
+  #
+  pass
+
+</script></html>
